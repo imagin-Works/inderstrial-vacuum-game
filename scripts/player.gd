@@ -36,6 +36,7 @@ var shield_active: bool = false  # هل الدرع مفعل
 @onready var absorption_area = $AbsorptionArea  # منطقة الامتصاص
 @onready var health_bar = $HealthBar  # شريط الصحة
 @onready var camera_3d = $Camera3D
+@onready var inventory = $inventory
 
 
 # نظام الإشارات
@@ -142,6 +143,15 @@ func _physics_process(delta):
 		if camera_3d.position.z >= 3.5:
 			camera_3d.position.z -= 1
 		pass
+	
+	if Input.is_action_pressed("inventory"):
+		if inventory.visible == false:
+			inventory.visible = true
+		pass
+	if Input.is_action_pressed("ESC"):
+		inventory.visible = false
+		pass
+	
 	
 	# إذا كان هناك إدخال حركة
 	if direction != Vector3.ZERO:
