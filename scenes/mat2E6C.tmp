@@ -1,0 +1,155 @@
+[gd_scene load_steps=3 format=3 uid="uid://ciwkalavudkml"]
+
+[sub_resource type="GDScript" id="GDScript_bj7ny"]
+script/source = "extends Node3D
+
+
+# إعدادات الانجذاب
+@export var attraction_range: float = 10.0  # المسافة التي يبدأ عندها الانجذاب
+@export var min_attraction_speed: float = 1.0  # أقل سرعة انجذاب
+@export var max_attraction_speed: float = 15.0  # أقصى سرعة انجذاب
+@export var acceleration: float = 10.0  # تسارع الانجذاب
+@export var absorption_threshold: float = 1.5  # المسافة التي يمكن عندها امتصاص الكائن
+
+# مرجع للاعب
+var player = null
+
+# متغير السرعة الحالية
+var velocity: Vector3 = Vector3.ZERO
+
+# متغيرات التأثيرات
+@export var enable_rotation: bool = true  # تمكين دوران الكائن أثناء الانجذاب
+@export var rotation_speed: float = 5.0  # سرعة الدوران
+@export var material_type: String = \"iron\"  # نوع المادة: iron, copper, silicon
+@export var material_amount: float = 1.0  # كمية المادة
+
+var is_being_attracted: bool = false  # هل الكائن تحت تأثير الجذب حالياً
+var current_rotation: Vector3 = Vector3.ZERO  # الدوران الحالي للكائن
+var current_rotation_speed: float = 0.0  # سرعة الدوران الحالية
+
+# متغيرات للتأثيرات البصرية
+@onready var mesh_instance = $MeshInstance3D if has_node(\"MeshInstance3D\") else null
+@onready var particles = $GPUParticles3D if has_node(\"GPUParticles3D\") else null
+@onready var original_scale = scale  # الحجم الأصلي للكائن
+
+func _ready():
+	# البحث عن اللاعب
+	player = get_tree().get_first_node_in_group(\"player\")
+	if not player:
+		# محاولة ثانية بالبحث عن العقدة اسمها \"Player\"
+		player = get_node_or_null(\"/root/Main/Player\") # تأكد من تغيير المسار حسب هيكل مشروعك
+	
+	# تكوين التأثيرات الأولية
+	if particles:
+		particles.emitting = false  # إيقاف الجسيمات حتى يبدأ الانجذاب
+
+func _physics_process(delta):
+	if player:
+		# حساب المسافة بين الكائن واللاعب
+		var distance_to_player = global_position.distance_to(player.global_position)
+		
+		# التحقق إذا كان الكائن في نطاق الانجذاب
+		if distance_to_player < attraction_range:
+			# تفعيل الانجذاب
+			is_being_attracted = true
+			
+			# تفعيل الجسيمات إذا كانت موجودة
+			if particles and not particles.emitting:
+				particles.emitting = true
+			
+			# حساب سرعة الانجذاب بناءً على المسافة (أسرع عندما يكون أقرب)
+			var attraction_factor = 1.0 - (distance_to_player / attraction_range)
+			var target_speed = lerp(min_attraction_speed, max_attraction_speed, attraction_factor)
+			
+			# حساب اتجاه الحركة (نحو اللاعب)
+			var move_direction = (player.global_position - global_position).normalized()
+			
+			# تحديث السرعة تدريجياً لتجنب التغيير المفاجئ
+			velocity = velocity.move_toward(move_direction * target_speed, acceleration * delta)
+			
+			# تطبيق الدوران إذا كان مفعلاً
+			if enable_rotation:
+				# زيادة سرعة الدوران تدريجياً
+				current_rotation_speed = min(current_rotation_speed + delta * 2.0, rotation_speed)
+				
+				# تحديث الدوران
+				current_rotation.x += current_rotation_speed * delta
+				current_rotation.y += current_rotation_speed * delta * 0.7
+				current_rotation.z += current_rotation_speed * delta * 0.5
+				
+				# تطبيق الدوران
+				rotation_degrees = current_rotation
+			
+			# تقليل حجم الكائن تدريجياً عند الاقتراب من اللاعب
+			if distance_to_player < attraction_range * 0.5:
+				var scale_factor = distance_to_player / (attraction_range * 0.5)
+				scale = original_scale * max(0.5, scale_factor)
+			
+			# التحقق إذا كان الكائن قريباً بما يكفي للامتصاص
+			if distance_to_player < absorption_threshold:
+				on_absorbed()
+		else:
+			# إلغاء تفعيل الانجذاب
+			if is_being_attracted:
+				is_being_attracted = false
+				
+				# إيقاف الجسيمات
+				if particles:
+					particles.emitting = false
+				
+				# تقليل سرعة الدوران تدريجياً
+				current_rotation_speed = max(current_rotation_speed - delta * 4.0, 0.0)
+				
+				# استعادة الحجم الأصلي تدريجياً
+				scale = scale.lerp(original_scale, delta * 3.0)
+				
+				# تقليل السرعة تدريجياً
+				velocity = velocity.move_toward(Vector3.ZERO, acceleration * delta * 2.0)
+		
+		# تنفيذ الحركة
+		move_and_slide()
+
+# الدالة التي تُستدعى عند امتصاص الكائن
+func on_absorbed():
+	# تعطيل التصادم لمنع التفاعلات الإضافية
+	set_collision_layer_value(1, false)
+	set_collision_mask_value(1, false)
+	
+	# تفعيل تأثير نهائي للامتصاص
+	if particles:
+		particles.amount = 20  # زيادة عدد الجسيمات
+		particles.one_shot = true  # جعلها انبعاث لمرة واحدة
+		particles.emitting = true
+	
+	# تقليل حجم الكائن تدريجياً
+	var tween = create_tween()
+	tween.tween_property(self, \"scale\", Vector3.ZERO, 0.5)
+	
+	# محاولة إرسال المادة إلى اللاعب
+	if player.has_method(\"add_absorbed_material\"):
+		player.add_absorbed_material(material_type, material_amount)
+	
+	# حذف الكائن بعد انتهاء التأثير
+	tween.tween_callback(queue_free)
+	
+	# تعطيل معالجة الفيزياء لمنع الحركة الإضافية
+	set_physics_process(false)
+"
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_qyj72"]
+
+[node name="materials" type="Node3D"]
+script = SubResource("GDScript_bj7ny")
+attraction_range = null
+min_attraction_speed = null
+max_attraction_speed = null
+acceleration = null
+absorption_threshold = null
+enable_rotation = null
+rotation_speed = null
+material_type = null
+material_amount = null
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.522019, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_qyj72")

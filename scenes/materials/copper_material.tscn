@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://crpaqmgt2un7a"]
+
+[ext_resource type="Script" path="res://scripts/material.gd" id="1_rutn1"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_0e26v"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rks8a"]
+albedo_color = Color(0.829919, 0.452594, 0.127387, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_nccq8"]
+
+[node name="Copper_material" type="CharacterBody3D"]
+script = ExtResource("1_rutn1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_0e26v")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_rks8a")
+mesh = SubResource("CapsuleMesh_nccq8")

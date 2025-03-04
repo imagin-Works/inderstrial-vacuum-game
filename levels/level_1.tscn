@@ -1,0 +1,103 @@
+[gd_scene load_steps=13 format=3 uid="uid://14iprbvlsxsr"]
+
+[ext_resource type="PackedScene" uid="uid://ckc6016g1q0qj" path="res://scenes/player.tscn" id="1_8cl2h"]
+[ext_resource type="PackedScene" uid="uid://dr6prrxaqgdns" path="res://scenes/materials/iron_material.tscn" id="2_2jdgt"]
+[ext_resource type="PackedScene" uid="uid://crpaqmgt2un7a" path="res://scenes/materials/copper_material.tscn" id="3_ijkno"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_qupn2"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_ijx04"]
+sky_material = SubResource("ProceduralSkyMaterial_qupn2")
+
+[sub_resource type="Environment" id="Environment_hglfw"]
+background_mode = 2
+sky = SubResource("Sky_ijx04")
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1txjw"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_r0k52"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vkqrq"]
+size = Vector3(10.0012, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_267st"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qisu1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sscrl"]
+
+[node name="level 1" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_hglfw")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_1txjw")
+mesh = SubResource("BoxMesh_r0k52")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_vkqrq")
+
+[node name="StaticBody3D2" type="StaticBody3D" parent="."]
+transform = Transform3D(0.000314206, -1, 0, 1, 0.000314206, 0, 0, 0, 1, -5.48416, 4.50582, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2"]
+transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_267st")
+mesh = SubResource("BoxMesh_r0k52")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2"]
+shape = SubResource("BoxShape3D_vkqrq")
+
+[node name="StaticBody3D4" type="StaticBody3D" parent="."]
+transform = Transform3D(0.000314206, -1, 0, 1, 0.000314206, 0, 0, 0, 1, 5.47136, 4.51378, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D4"]
+transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_qisu1")
+mesh = SubResource("BoxMesh_r0k52")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D4"]
+shape = SubResource("BoxShape3D_vkqrq")
+
+[node name="StaticBody3D3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0039258, 9.01407, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D3"]
+transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_sscrl")
+mesh = SubResource("BoxMesh_r0k52")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D3"]
+shape = SubResource("BoxShape3D_vkqrq")
+
+[node name="StaticBody3D5" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0039258, 4.4684, -0.843979)
+visible = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D5"]
+transform = Transform3D(11.1294, 0, 0, 0, 10.1173, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_sscrl")
+mesh = SubResource("BoxMesh_r0k52")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D5"]
+shape = SubResource("BoxShape3D_vkqrq")
+
+[node name="player" parent="." groups=["player"] instance=ExtResource("1_8cl2h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.959952, 0)
+
+[node name="IronMaterial" parent="." instance=ExtResource("2_2jdgt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.20442, 7.27884, 0)
+
+[node name="Copper_material" parent="." instance=ExtResource("3_ijkno")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.55251, 5.74682, 0)

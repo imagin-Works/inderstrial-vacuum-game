@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://dr6prrxaqgdns"]
+
+[ext_resource type="Script" path="res://scripts/material.gd" id="1_qi8gv"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6nti7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_glou4"]
+albedo_color = Color(0.728851, 0, 0.13443, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_52jns"]
+
+[node name="IronMaterial" type="CharacterBody3D"]
+script = ExtResource("1_qi8gv")
+detection_range = 7.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_6nti7")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_glou4")
+mesh = SubResource("CapsuleMesh_52jns")
