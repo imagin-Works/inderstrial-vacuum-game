@@ -23,8 +23,17 @@ const HEALTH_BAR_6 = preload("res://photos/heealth bar 6.png")
 @export var absorption_multiplier: float = 1.0  # مضاعف سرعة الامتصاص
 @export var can_absorb: bool = true  # هل يمكن للاعب الامتصاص حالياً
 
+# خصائص التحكم بالماوس (إضافة جديدة)
+@export var mouse_control_enabled: bool = true  # تفعيل/تعطيل التحكم بالماوس
+@export var mouse_sensitivity: float = 0.01     # حساسية الماوس
+
 # متغيرات لتأثيرات الأدوات
 var shield_active: bool = false  # هل الدرع مفعل
+
+# متغيرات التحكم بالماوس (إضافة جديدة)
+var is_right_mouse_pressed: bool = false
+var mouse_position: Vector2 = Vector2.ZERO
+var previous_mouse_position: Vector2 = Vector2.ZERO
 
 # مراجع للعقد الفرعية
 @onready var mesh_instance = $MeshInstance3D  # نموذج الثقب الأسود
@@ -37,7 +46,6 @@ var shield_active: bool = false  # هل الدرع مفعل
 @onready var health_bar = $HealthBar  # شريط الصحة
 @onready var camera_3d = $Camera3D
 @onready var inventory = $inventory
-
 
 # نظام الإشارات
 signal size_changed(new_size)
@@ -100,6 +108,23 @@ func _ready():
 	
 	# الاتصال بإشارة تلقي الضرر لتحديث شريط الصحة
 	connect("player_damaged", update_health_bar_on_damage)
+	
+	# تهيئة وضع الماوس للتحكم بالماوس (إضافة جديدة)
+	if mouse_control_enabled:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+func _input(event):
+	# إضافة جديدة: معالجة إدخال الماوس
+	if mouse_control_enabled:
+		# التقاط ضغط الزر الأيمن للماوس
+		if event is InputEventMouseButton:
+			if event.button_index == MOUSE_BUTTON_RIGHT:
+				is_right_mouse_pressed = event.pressed
+		
+		# تتبع حركة الماوس
+		if event is InputEventMouseMotion:
+			previous_mouse_position = mouse_position
+			mouse_position = event.position
 
 func _process(delta):
 	# تحديث قيمة الوقت في الشادر
@@ -123,37 +148,49 @@ func _process(delta):
 	check_tool_input()
 
 func _physics_process(delta):
-	# تنفيذ حركة اللاعب
 	var direction = Vector3.ZERO
 	
-	# التقاط إدخال اللاعب لحركة سلسة على المحورين X و Z
-	if Input.is_action_pressed("ui_left"):
-		direction.x -= 1  # التحرك لليسار (X-)
-	if Input.is_action_pressed("ui_right"):
-		direction.x += 1  # التحرك لليمين (X+)
-	if Input.is_action_pressed("ui_up"):
-		direction.y += 1  # التحرك للأمام (Z-)
-	if Input.is_action_pressed("ui_down"):
-		direction.y -= 1  # التحرك للخلف (Z+)
+	# التحكم بلوحة المفاتيح (الطريقة الأصلية)
+	if !is_right_mouse_pressed:  # استخدم لوحة المفاتيح فقط إذا لم يكن زر الماوس الأيمن مضغوطاً
+		# التقاط إدخال اللاعب لحركة سلسة على المحورين X و Z
+		if Input.is_action_pressed("ui_left"):
+			direction.x -= 1  # التحرك لليسار (X-)
+		if Input.is_action_pressed("ui_right"):
+			direction.x += 1  # التحرك لليمين (X+)
+		if Input.is_action_pressed("ui_up"):
+			direction.y += 1  # التحرك للأمام (Z-)
+		if Input.is_action_pressed("ui_down"):
+			direction.y -= 1  # التحرك للخلف (Z+)
 	
+	# التحكم بالماوس (إضافة جديدة)
+	if is_right_mouse_pressed and mouse_control_enabled:
+		# حساب حركة الماوس
+		var mouse_delta = mouse_position - previous_mouse_position
+		
+		# الحصول على اتجاه الكاميرا
+		var forward = -camera.global_transform.basis.z
+		var right = camera.global_transform.basis.x
+		
+		# تحريك اللاعب بناءً على حركة الماوس
+		direction += forward * -mouse_delta.y * mouse_sensitivity
+		direction += right * -mouse_delta.x * mouse_sensitivity
+	
+	# إدارة التقريب/الابتعاد بعجلة الماوس
 	if Input.is_action_pressed("middel_mouse"):
-		if camera_3d.position.z <= 10 :
+		if camera_3d.position.z <= 10:
 			camera_3d.position.z += 0.4  # التحرك للخلف (Z+)
-	else :
+	else:
 		if camera_3d.position.z >= 3.5:
 			camera_3d.position.z -= 1
-		pass
 	
+	# التحكم في واجهة المخزون
 	if Input.is_action_pressed("inventory"):
 		if inventory.visible == false:
 			inventory.visible = true
-		pass
 	if Input.is_action_pressed("ESC"):
 		inventory.visible = false
-		pass
 	
-	
-	# إذا كان هناك إدخال حركة
+	# تطبيق الحركة
 	if direction != Vector3.ZERO:
 		direction = direction.normalized()
 		velocity = velocity.move_toward(direction * max_speed, acceleration * delta)  # تسريع سلس
@@ -265,13 +302,7 @@ func toggle_shield(is_active: bool):
 # تحديث نص واجهة المستخدم
 func update_hud():
 	if hud_label:
-		hud_label.text = "الصحه: %d%%     
-	
-	
-	
-	
-	
-	الطاقه: %d%%" % [int(health), int(energy)]
+		hud_label.text = "الصحه: %d%%     الطاقه: %d%%" % [int(health), int(energy)]
 
 # تحديث شريط الصحة بناء على قيمة الصحة الحالية
 func update_health_bar():
@@ -333,3 +364,11 @@ func die():
 	# الانتقال إلى شاشة الموت بعد فترة
 	await get_tree().create_timer(2.0).timeout
 	# get_tree().change_scene_to_file("res://ui/game_over.tscn")
+
+# دالة لتفعيل/تعطيل التحكم بالماوس (إضافة جديدة)
+func set_mouse_control(enabled: bool):
+	mouse_control_enabled = enabled
+	if enabled:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	else:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)

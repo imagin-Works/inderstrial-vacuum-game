@@ -1,0 +1,62 @@
+[gd_scene load_steps=9 format=3 uid="uid://ckc6016g1q0qj"]
+
+[ext_resource type="Shader" path="res://scripts/black-hole_shader.gdshader" id="1_aixii"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_dsung"]
+[ext_resource type="Script" path="res://cenes.gd" id="3_hujty"]
+[ext_resource type="Texture2D" uid="uid://b8g0xtj6jww46" path="res://photos/health bar 1.png" id="3_mebbw"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kv4jt"]
+render_priority = 0
+shader = ExtResource("1_aixii")
+shader_parameter/color = Vector4(0, 0, 0, 0)
+
+[sub_resource type="SphereMesh" id="SphereMesh_dd7rm"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_yg06f"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_ab7am"]
+font_color = Color(0, 0, 0, 1)
+
+[node name="player" type="CharacterBody3D"]
+script = ExtResource("1_dsung")
+absorption_multiplier = 0.7
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("ShaderMaterial_kv4jt")
+mesh = SubResource("SphereMesh_dd7rm")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_yg06f")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.45436)
+script = ExtResource("3_hujty")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+offset_left = 53.0
+offset_top = 14.0
+offset_right = 93.0
+offset_bottom = 37.0
+
+[node name="HealthBar" type="Sprite2D" parent="CanvasLayer"]
+position = Vector2(82, 47)
+scale = Vector2(0.132246, 0.132246)
+texture = ExtResource("3_mebbw")
+
+[node name="inventory" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="inventory"]
+offset_left = 474.0
+offset_top = 340.0
+offset_right = 1436.0
+offset_bottom = 874.0
+
+[node name="Label" type="Label" parent="inventory"]
+offset_left = 528.0
+offset_top = 399.0
+offset_right = 568.0
+offset_bottom = 422.0
+label_settings = SubResource("LabelSettings_ab7am")

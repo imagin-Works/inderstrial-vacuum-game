@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://ckc6016g1q0qj"]
 
-[ext_resource type="Shader" path="res://scripts/black-hole_shader.gdshader" id="1_aixii"]
-[ext_resource type="Script" path="res://scripts/player.gd" id="1_dsung"]
+[ext_resource type="Shader" uid="uid://i7pi2gr0b3mu" path="res://scripts/black-hole_shader.gdshader" id="1_aixii"]
+[ext_resource type="Script" uid="uid://bdgty7kghvgs" path="res://scripts/PLAYER.gd" id="1_axfiu"]
 [ext_resource type="Texture2D" uid="uid://b8g0xtj6jww46" path="res://photos/health bar 1.png" id="3_mebbw"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_kv4jt"]
@@ -17,7 +17,7 @@ shader_parameter/color = Vector4(0, 0, 0, 0)
 font_color = Color(0, 0, 0, 1)
 
 [node name="player" type="CharacterBody3D"]
-script = ExtResource("1_dsung")
+script = ExtResource("1_axfiu")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 material_override = SubResource("ShaderMaterial_kv4jt")
@@ -43,13 +43,12 @@ scale = Vector2(0.132246, 0.132246)
 texture = ExtResource("3_mebbw")
 
 [node name="inventory" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="ColorRect" type="ColorRect" parent="inventory"]
 offset_left = 474.0
-offset_top = 340.0
+offset_top = 273.0
 offset_right = 1436.0
-offset_bottom = 874.0
+offset_bottom = 807.0
 
 [node name="Label" type="Label" parent="inventory"]
 offset_left = 528.0
